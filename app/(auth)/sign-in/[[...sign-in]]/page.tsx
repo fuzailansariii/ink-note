@@ -6,10 +6,34 @@ import { Separator } from "@/components/ui/separator";
 import Email from "@/icons/email";
 import Google from "@/icons/google";
 import Password from "@/icons/password";
+import { signInSchema } from "@/schemas/zodSchema";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import React from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
 export default function SignIn() {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<z.infer<typeof signInSchema>>({
+    resolver: zodResolver(signInSchema),
+  });
+
+  const onSubmit = async (data: z.infer<typeof signInSchema>) => {
+    try {
+      // Simulate a sign-in process
+      console.log("Signing in with data:", data);
+      // Reset the form after successful submission
+      reset();
+    } catch (error) {
+      console.error("Sign-in error:", error);
+    }
+  };
+
   return (
     <Container>
       <div className="flex justify-evenly h-screen items-center">
@@ -43,9 +67,24 @@ export default function SignIn() {
             </div>
 
             {/* Login form */}
-            <form className="flex flex-col gap-4">
-              <Input placeholder="Email" type={"email"} icon={Email} />
-              <Input placeholder="Password" type={"password"} icon={Password} />
+            <form
+              className="flex flex-col gap-4"
+              onSubmit={handleSubmit(onSubmit)}
+            >
+              <Input
+                placeholder="Email"
+                type={"email"}
+                icon={Email}
+                register={register("email")}
+                error={errors.email?.message}
+              />
+              <Input
+                placeholder="Password"
+                type={"password"}
+                icon={Password}
+                register={register("password")}
+                error={errors.password?.message}
+              />
               <p className="text-xs font-nunito text-end">
                 <Link
                   href={"/forgot-password"}
@@ -54,7 +93,9 @@ export default function SignIn() {
                   forgot password
                 </Link>
               </p>
-              <Button type="submit">Sign In</Button>
+              <Button type="submit" isSubmitting={isSubmitting}>
+                Sign In
+              </Button>
             </form>
             <p className="text-xs text-center font-nunito">
               Don't have an account?{" "}

@@ -9,6 +9,7 @@ interface ButtonProps {
   onClick?: () => void;
   type?: "button" | "submit" | "reset";
   children?: React.ReactNode;
+  isSubmitting?: boolean;
 }
 
 export default function Button({
@@ -17,6 +18,7 @@ export default function Button({
   onClick,
   type = "button",
   children,
+  isSubmitting,
 }: ButtonProps) {
   return (
     <button
@@ -26,6 +28,7 @@ export default function Button({
         "flex justify-center items-center gap-2 px-6 py-2 w-full border rounded-md shadow-lg font-quicksand font-semibold transition hover:bg-gray-100",
         className
       )}
+      disabled={isSubmitting}
     >
       {children || title}
     </button>
