@@ -34,3 +34,17 @@ export const signInSchema = z.object({
   email: emailSchema,
   password: z.string().min(1, { message: "Password is required" }),
 });
+
+export const contactUsSchema = z.object({
+  fullName: z
+    .string()
+    .min(1, { message: "Name is required" })
+    .min(3, { message: "Name must be at least of 3 character" })
+    .regex(/^[a-zA-Z0-9]+$/, {
+      message: "Username must contain only letters and numbers",
+    }),
+  email: emailSchema,
+  message: z
+    .string()
+    .min(20, { message: "Message must be at least of 20 characters" }),
+});

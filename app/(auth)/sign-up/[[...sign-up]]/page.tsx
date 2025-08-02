@@ -112,26 +112,17 @@ export default function SignUp() {
         <div className="flex flex-col px-5 py-10 gap-7 rounded-md shadow-xl w-full md:w-2/5 mx-4">
           <h1 className="text-3xl font-semibold font-quicksand">iNK Note</h1>
           <div className="flex flex-col">
-            <h2 className="text-xl font-semibold font-nunito">Sign Up</h2>
-            <p className="text-sm font-light font-nunito text-gray-500">
-              Hello! Select method to Sign Up
-            </p>
+            <h2 className="text-xl font-semibold font-nunito text-center">
+              Register a new account
+            </h2>
           </div>
 
           <div className="w-full md:max-w-sm lg:min-w-sm md:mx-auto flex flex-col gap-6 mb-5">
-            {/* OAuth */}
-            <div className="flex gap-2 font-nunito">
-              <Button>
-                <Google />
-                <span>Google</span>
-              </Button>
-            </div>
-
             {/* seperator */}
             <div className="flex items-center gap-2">
               <Separator />
               <p className="text-xs whitespace-nowrap text-gray-500">
-                or continue with email
+                continue with email
               </p>
               <Separator />
             </div>
@@ -175,7 +166,6 @@ export default function SignUp() {
             </p>
           </div>
         </div>
-        <div className="hidden md:block">Hello World</div>
       </div>
     </Container>
   );
