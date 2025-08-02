@@ -6,13 +6,22 @@ import { Separator } from "@/components/ui/separator";
 import Email from "@/icons/email";
 import Google from "@/icons/google";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { signUpSchema } from "@/schemas/zodSchema";
+import { set, z } from "zod";
+import { signUpSchema, verificationCodeSchema } from "@/schemas/zodSchema";
+import { useSignUp } from "@clerk/nextjs";
+import VerificationCodeForm from "@/components/verificationCodeForm";
+import { useRouter } from "next/navigation";
+import User from "@/icons/user";
+import Password from "@/icons/password";
 
 export default function SignUp() {
+  const [isVerifying, setIsVerifying] = useState(false);
+  const { signUp, isLoaded, setActive } = useSignUp();
+  const router = useRouter();
+
   const {
     register,
     handleSubmit,
@@ -20,17 +29,82 @@ export default function SignUp() {
     reset,
   } = useForm<z.infer<typeof signUpSchema>>({
     resolver: zodResolver(signUpSchema),
+    defaultValues: {
+      email: "",
+      username: "",
+      password: "",
+    },
   });
 
   const onSubmit = async (data: z.infer<typeof signUpSchema>) => {
+    if (!isLoaded) return; // Ensure Clerk is loaded before proceeding
+    isSubmitting;
+    console.log("Is submitting:", isSubmitting);
     try {
       // Handle sign up logic here
-      console.log("Sign up data:", data);
+      if (!data.email || !data.username || !data.password) {
+        throw new Error("All fields are required");
+      }
+      if (!signUp) {
+        throw new Error("SignUp service is not available");
+      }
+      // Create a new sign-up
+      await signUp.create({
+        emailAddress: data.email,
+        username: data.username,
+        password: data.password,
+      });
+
+      await signUp.prepareEmailAddressVerification({
+        strategy: "email_code",
+      });
+      setIsVerifying(true);
       reset(); // Reset form after successful submission
     } catch (error) {
       console.error("Sign Up Error:", error);
     }
   };
+
+  const handleVerification = async (
+    data: z.infer<typeof verificationCodeSchema>
+  ) => {
+    // Handle verification logic
+    if (!signUp || !isLoaded) return;
+    isSubmitting;
+    try {
+      const result = await signUp.attemptEmailAddressVerification({
+        code: data.verificationCode,
+      });
+      if (result.status === "complete") {
+        await setActive({ session: result.createdSessionId });
+        // TODO: EMail verified successfully
+        router.push("/dashboard");
+      } else {
+        console.error("Verification failed:", result.status);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("Verification error:", error.message);
+      } else {
+        console.error("Unexpected error during verification:", error);
+      }
+    }
+  };
+
+  if (isVerifying) {
+    return (
+      <Container>
+        <div className="flex justify-center items-center h-screen">
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold">Verification in Progress</h2>
+            <VerificationCodeForm
+              handleVerificationSubmit={handleVerification}
+            />
+          </div>
+        </div>
+      </Container>
+    );
+  }
 
   return (
     <Container>
@@ -68,12 +142,27 @@ export default function SignUp() {
               onSubmit={handleSubmit(onSubmit)}
             >
               <Input
+                placeholder="Username"
+                type={"text"}
+                icon={User}
+                register={register("username")}
+                error={errors.username?.message}
+              />
+              <Input
                 placeholder="Email"
                 type={"email"}
                 icon={Email}
                 register={register("email")}
                 error={errors.email?.message}
               />
+              <Input
+                placeholder="Password"
+                type={"password"}
+                icon={Password}
+                register={register("password")}
+                error={errors.password?.message}
+              />
+              <div id="clerk-captcha" />
               <Button type="submit" isSubmitting={isSubmitting}>
                 Sign Up
               </Button>
