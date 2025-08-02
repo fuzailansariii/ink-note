@@ -7,13 +7,18 @@ import Email from "@/icons/email";
 import Google from "@/icons/google";
 import Password from "@/icons/password";
 import { signInSchema } from "@/schemas/zodSchema";
+import { useSignIn } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
 export default function SignIn() {
+  const { signIn, isLoaded, setActive } = useSignIn();
+  const router = useRouter();
+
   const {
     register,
     handleSubmit,
@@ -21,16 +26,34 @@ export default function SignIn() {
     formState: { errors, isSubmitting },
   } = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
   });
 
   const onSubmit = async (data: z.infer<typeof signInSchema>) => {
     try {
-      // Simulate a sign-in process
-      console.log("Signing in with data:", data);
-      // Reset the form after successful submission
-      reset();
+      if (!isLoaded) return;
+      // Handle sign-in logic
+      const result = await signIn.create({
+        identifier: data.email,
+        password: data.password,
+      });
+      if (result.status === "complete") {
+        await setActive({ session: result.createdSessionId });
+        router.push("/dashboard");
+      } else {
+        console.error("Sign-in failed:", result);
+        throw new Error("Sign-in failed, please try again.");
+      }
+      reset(); // Reset the form after successful submission
     } catch (error) {
-      console.error("Sign-in error:", error);
+      if (error instanceof Error) {
+        console.error("Sign-in error:", error.message);
+      } else {
+        console.error("An unexpected error occurred during sign-in.");
+      }
     }
   };
 
@@ -40,28 +63,17 @@ export default function SignIn() {
         <div className="flex flex-col px-5 py-10 gap-7 rounded-md shadow-xl w-full md:w-2/5 mx-4">
           <h1 className="text-3xl font-semibold font-quicksand">iNK Note</h1>
           <div className="flex flex-col">
-            <h2 className="text-xl font-semibold font-nunito">
+            <h2 className="text-xl font-semibold font-nunito text-center">
               Login to your account
             </h2>
-            <p className="text-sm font-light font-nunito text-gray-500">
-              Welcome back! Select method to Sign In
-            </p>
           </div>
 
           <div className="w-full md:max-w-sm lg:min-w-sm md:mx-auto flex flex-col gap-6 mb-5">
-            {/* OAuth */}
-            <div className="flex gap-2 font-nunito">
-              <Button>
-                <Google />
-                <span>Google</span>
-              </Button>
-            </div>
-
             {/* seperator */}
             <div className="flex items-center gap-2">
               <Separator />
               <p className="text-xs whitespace-nowrap text-gray-500">
-                or continue with email
+                continue with email
               </p>
               <Separator />
             </div>
@@ -105,7 +117,6 @@ export default function SignIn() {
             </p>
           </div>
         </div>
-        <div className="hidden md:block">Hello World</div>
       </div>
     </Container>
   );

@@ -10,6 +10,7 @@ interface InputProps {
   icon?: IconType;
   register?: UseFormRegisterReturn;
   error?: string;
+  disabled?: boolean;
 }
 
 export default function Input({
@@ -18,17 +19,21 @@ export default function Input({
   icon: Icon,
   register,
   error,
+  disabled,
 }: InputProps) {
   return (
-    <label className="flex items-center border rounded-[4px] pl-2 py-2 text-sm font-quicksand font-semibold">
-      {Icon && <Icon className="inline-block" />}
-      <input
-        {...register}
-        placeholder={placeholder}
-        type={type}
-        className="outline-none px-1 text-base w-full font-nunito"
-      />
+    <>
+      <label className="flex items-center border rounded-[4px] pl-2 py-2 text-sm font-quicksand font-semibold">
+        {Icon && <Icon className="inline-block" />}
+        <input
+          {...register}
+          placeholder={placeholder}
+          type={type}
+          className="outline-none px-1 text-base w-full font-nunito"
+          disabled={disabled}
+        />
+      </label>
       {error && <p className="text-red-500 text-xs">{error}</p>}
-    </label>
+    </>
   );
 }
