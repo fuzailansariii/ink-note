@@ -12,7 +12,6 @@ export default function Navbar() {
 
   const { isSignedIn } = useUser();
   const menuItems = [
-    { name: "Home", href: "/" },
     { name: "About", href: "/about" },
     { name: "Contact", href: "/contact" },
     ...(isSignedIn
@@ -29,10 +28,13 @@ export default function Navbar() {
 
   return (
     <>
-      <Container className="w-full sm:px-4 md:w-3/4 px-3 py-4 font-quicksand rounded-sm fixed top-0 left-1/2 transform -translate-x-1/2 bg-white shadow-md z-50">
-        <div className="flex justify-between items-center">
+      <Container className="font-quicksand fixed top-0 left-1/2 z-50 w-full -translate-x-1/2 transform rounded-sm bg-neutral-900 px-3 py-4 shadow-md sm:px-4 md:w-3/4">
+        <div className="flex items-center justify-between">
           {/* logo/title - left*/}
-          <Link href={"/"} className="text-2xl font-bold text-gray-800">
+          <Link
+            href={"/"}
+            className="bg-gradient-to-b from-slate-300 to-gray-500 bg-clip-text text-2xl font-bold text-transparent"
+          >
             iNK NOTE
           </Link>
 
@@ -44,7 +46,7 @@ export default function Navbar() {
                 <Link
                   href={item.href}
                   key={index}
-                  className="mx-2 text-gray-600 hover:text-gray-800"
+                  className="mx-2 text-neutral-400 transition-colors duration-200 hover:text-neutral-500 focus:text-neutral-300"
                   aria-label={item.name}
                 >
                   {item.name}
@@ -52,9 +54,9 @@ export default function Navbar() {
               ))}
             </div>
             {/* mobile menu style */}
-            <div className="flex md:hidden mr-2">
+            <div className="mr-2 flex md:hidden">
               <button
-                className=" text-gray-600 hover:text-gray-800 focus:outline-none"
+                className="text-gray-600 hover:text-gray-800 focus:outline-none"
                 onClick={mobileMenuToggle}
               >
                 {mobileMenuOpen ? <XMark /> : <MenuButton />}
@@ -72,14 +74,14 @@ export default function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.25 }}
-            className="md:hidden fixed top-20 left-1/2 transform -translate-x-1/2 w-full sm:w-3/4 bg-white shadow-lg rounded-lg z-40 px-6 py-4 space-y-3"
+            className="fixed top-20 left-1/2 z-40 w-full -translate-x-1/2 transform space-y-3 rounded-lg bg-white px-6 py-4 shadow-lg sm:w-3/4 md:hidden"
           >
             {menuItems.map((item, index) => (
               <Link
                 key={index}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="block text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200"
+                className="block font-medium text-gray-700 transition-colors duration-200 hover:text-blue-600"
               >
                 {item.name}
               </Link>

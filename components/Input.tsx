@@ -23,17 +23,17 @@ export default function Input({
 }: InputProps) {
   return (
     <>
-      <label className="flex items-center border rounded-[4px] pl-2 py-2 text-sm font-quicksand font-semibold">
+      <label className="font-quicksand border-neutral flex items-center rounded-[4px] border py-2 pl-2 text-sm font-semibold text-white focus:ring-1">
         {Icon && <Icon className="inline-block" />}
         <input
           {...register}
           placeholder={placeholder}
           type={type}
-          className="outline-none px-1 text-base w-full font-nunito"
+          className="font-nunito mx-1 w-full rounded-sm bg-transparent px-1 text-base text-white outline-none placeholder:text-neutral-500"
           disabled={disabled}
         />
       </label>
-      {error && <p className="text-red-500 text-xs">{error}</p>}
+      {error && <p className="text-xs text-red-500">{error}</p>}
     </>
   );
 }

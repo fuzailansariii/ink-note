@@ -4,7 +4,6 @@ import Container from "@/components/container";
 import Input from "@/components/Input";
 import { Separator } from "@/components/ui/separator";
 import Email from "@/icons/email";
-import Google from "@/icons/google";
 import Link from "next/link";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -16,9 +15,10 @@ import VerificationCodeForm from "@/components/verificationCodeForm";
 import { useRouter } from "next/navigation";
 import User from "@/icons/user";
 import Password from "@/icons/password";
+import { is } from "drizzle-orm";
 
 export default function SignUp() {
-  const [isVerifying, setIsVerifying] = useState(false);
+  const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const { signUp, isLoaded, setActive } = useSignUp();
   const router = useRouter();
 
@@ -38,8 +38,6 @@ export default function SignUp() {
 
   const onSubmit = async (data: z.infer<typeof signUpSchema>) => {
     if (!isLoaded) return; // Ensure Clerk is loaded before proceeding
-    isSubmitting;
-    console.log("Is submitting:", isSubmitting);
     try {
       // Handle sign up logic here
       if (!data.email || !data.username || !data.password) {
@@ -66,7 +64,7 @@ export default function SignUp() {
   };
 
   const handleVerification = async (
-    data: z.infer<typeof verificationCodeSchema>
+    data: z.infer<typeof verificationCodeSchema>,
   ) => {
     // Handle verification logic
     if (!signUp || !isLoaded) return;
@@ -93,31 +91,26 @@ export default function SignUp() {
 
   if (isVerifying) {
     return (
-      <Container>
-        <div className="flex justify-center items-center h-screen">
-          <div className="text-center">
-            <h2 className="text-2xl font-semibold">Verification in Progress</h2>
-            <VerificationCodeForm
-              handleVerificationSubmit={handleVerification}
-            />
-          </div>
-        </div>
+      <Container className="flex justify-center">
+        <VerificationCodeForm handleVerificationSubmit={handleVerification} />
       </Container>
     );
   }
 
   return (
     <Container>
-      <div className="flex justify-evenly h-screen items-center">
-        <div className="flex flex-col px-5 py-10 gap-7 rounded-md shadow-xl w-full md:w-2/5 mx-4">
-          <h1 className="text-3xl font-semibold font-quicksand">iNK Note</h1>
+      <div className="flex h-screen items-center justify-evenly">
+        <div className="mx-4 flex w-full flex-col gap-7 rounded-md px-5 py-10 shadow-xl md:w-2/5">
+          <h1 className="font-quicksand text-neutral text-3xl font-semibold">
+            iNK Note
+          </h1>
           <div className="flex flex-col">
-            <h2 className="text-xl font-semibold font-nunito text-center">
+            <h2 className="font-nunito text-neutral2 text-center text-xl font-semibold">
               Register a new account
             </h2>
           </div>
 
-          <div className="w-full md:max-w-sm lg:min-w-sm md:mx-auto flex flex-col gap-6 mb-5">
+          <div className="mb-5 flex w-full flex-col gap-6 md:mx-auto md:max-w-sm lg:min-w-sm">
             {/* seperator */}
             <div className="flex items-center gap-2">
               <Separator />
@@ -155,10 +148,10 @@ export default function SignUp() {
               />
               <div id="clerk-captcha" />
               <Button type="submit" isSubmitting={isSubmitting}>
-                Sign Up
+                {isSubmitting ? "Signing Up..." : "Sign Up"}
               </Button>
             </form>
-            <p className="text-xs text-center font-nunito">
+            <p className="font-nunito text-center text-xs text-neutral-300">
               Already have an account?{" "}
               <Link href="/sign-in" className="text-blue-500 underline">
                 Sign In
