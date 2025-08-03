@@ -4,6 +4,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --color-neutral: oklch(70.8% 0 0);
+  --color-neutral2: oklch(87% 0 0);
   --font-quicksand: var(--font-quicksand);
   --font-nunito: var(--font-nunito);
   --color-background: var(--background);
@@ -76,7 +78,7 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  --background: oklch(1 0 0);
+  --background: oklch(26.9% 0 0);
   --foreground: oklch(0.145 0 0);
 }
 

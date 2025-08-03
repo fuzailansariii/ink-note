@@ -3,6 +3,7 @@ import {
   jsonb,
   pgEnum,
   pgTable,
+  PgTableWithColumns,
   text,
   timestamp,
   uuid,
@@ -12,7 +13,7 @@ export const roleEnum = pgEnum("role", ["admin", "member", "viewer"]);
 
 // users table
 export const users = pgTable("users", {
-  id: uuid("id").primaryKey(), // clerk user id
+  id: uuid("id").primaryKey().defaultRandom(), // clerk user id
   email: text("email").notNull().unique(),
   profileData: jsonb("profile_data"), // store clerk profile data
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -21,7 +22,7 @@ export const users = pgTable("users", {
 
 // workspace table
 export const workspaces = pgTable("workspaces", {
-  id: uuid("id").primaryKey().notNull(),
+  id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
   ownerId: uuid("owner_id")
     .notNull()
@@ -33,7 +34,7 @@ export const workspaces = pgTable("workspaces", {
 
 // workspace members table
 export const workspaceMembers = pgTable("workspace_members", {
-  id: uuid("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   workspaceId: uuid("workspace_id")
     .notNull()
     .references(() => workspaces.id, { onDelete: "cascade" }),
@@ -46,21 +47,21 @@ export const workspaceMembers = pgTable("workspace_members", {
 });
 
 // folders table
-export const folders = pgTable("folders", {
+export const folders: PgTableWithColumns<any> = pgTable("folders", {
   // id, workspaceId, name, parentFolderId, createdAt, updatedAt
-  id: uuid("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   workspaceId: uuid("workspace_id")
     .notNull()
     .references(() => workspaces.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
-  parentFolderId: uuid("parent_folder_id"),
+  parentFolderId: uuid("parent_folder_id").references(() => folders.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 // noted table
 export const notes = pgTable("notes", {
-  id: uuid("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   workspaceId: uuid("workspace_id")
     .notNull()
     .references(() => workspaces.id, { onDelete: "cascade" }),
@@ -68,15 +69,15 @@ export const notes = pgTable("notes", {
   content: text("content").notNull(),
   createdBy: uuid("created_by")
     .notNull()
-    .references(() => users.id),
-  folderId: uuid("folder_id"),
+    .references(() => users.id, { onDelete: "cascade" }),
+  folderId: uuid("folder_id").references(() => folders.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 // message table
-export const messages = pgTable("messages", {
-  id: uuid("id").primaryKey(),
+export const messages: PgTableWithColumns<any> = pgTable("messages", {
+  id: uuid("id").primaryKey().defaultRandom(),
   workspaceId: uuid("workspace_id")
     .notNull()
     .references(() => workspaces.id, { onDelete: "cascade" }),
@@ -84,7 +85,7 @@ export const messages = pgTable("messages", {
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   content: text("content").notNull(),
-  replyTo: uuid("reply_to"),
+  replyTo: uuid("reply_to").references(() => messages.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -94,7 +95,12 @@ export const messages = pgTable("messages", {
 // user relations
 export const usersRelations = relations(users, ({ many }) => ({
   ownedWorkspaces: many(workspaces),
-  workspaceMembers: many(workspaceMembers),
+  workspaceMembers: many(workspaceMembers, {
+    relationName: "memberRelation",
+  }),
+  invitedMembers: many(workspaceMembers, {
+    relationName: "inviterUser",
+  }),
   createdNotes: many(notes),
   sentMessages: many(messages),
 }));
@@ -120,14 +126,16 @@ export const workspaceMembersRelations = relations(
       references: [workspaces.id],
     }),
     user: one(users, {
-      fields: [workspaceMembers.invitedBy],
+      fields: [workspaceMembers.userId],
       references: [users.id],
+      relationName: "memberUser",
     }),
     inviter: one(users, {
       fields: [workspaceMembers.invitedBy],
       references: [users.id],
+      relationName: "inviterUser",
     }),
-  })
+  }),
 );
 
 // folder relations
@@ -139,6 +147,7 @@ export const folderRelations = relations(folders, ({ one, many }) => ({
   parentFolder: one(folders, {
     fields: [folders.parentFolderId],
     references: [folders.id],
+    relationName: "subFolders",
   }),
   subFolders: many(folders, {
     relationName: "subFolders",
@@ -166,6 +175,9 @@ export const messageRelations = relations(messages, ({ one, many }) => ({
   replyToMessage: one(messages, {
     fields: [messages.replyTo],
     references: [messages.id],
+    relationName: "messageReplies",
   }),
-  replies: many(messages),
+  replies: many(messages, {
+    relationName: "messageReplies",
+  }),
 }));

@@ -9,7 +9,7 @@ import { useSignUp } from "@clerk/nextjs";
 
 interface VerificationCodeFormProps {
   handleVerificationSubmit: (
-    data: z.infer<typeof verificationCodeSchema>
+    data: z.infer<typeof verificationCodeSchema>,
   ) => void;
 }
 
@@ -58,18 +58,16 @@ export default function VerificationCodeForm({
   };
 
   return (
-    <div className="flex flex-col px-5 py-10 gap-7 rounded-md shadow-xl w-full md:w-2/5">
-      <div>
-        <h2 className="text-xl font-semibold font-nunito text-center mt-5">
-          Verify Your Email
-        </h2>
-      </div>
-      <p className="text-center text-md text-gray-600">
+    <div className="mt-30 flex w-full flex-col gap-7 rounded-md px-5 py-10 shadow-lg md:w-2/5">
+      <h2 className="font-nunito text-neutral mt-5 text-center text-xl font-semibold">
+        Verify Your Email
+      </h2>
+      <p className="text-md text-center text-gray-600">
         We have sent a 6-digit verification code to your email address. Please
         enter it below.
       </p>
       <form
-        className="flex flex-col gap-5 min-w-72 md:w-2/3 mx-auto mb-5"
+        className="mx-auto mb-5 flex min-w-72 flex-col gap-5 md:w-2/3"
         onSubmit={handleSubmit(onSubmit)}
       >
         <Input
@@ -83,12 +81,12 @@ export default function VerificationCodeForm({
           {isSubmitting ? "Verifying..." : "Verify"}
         </Button>
       </form>
-      <div className="flex justify-center items-center gap-2 text-gray-600">
+      <div className="flex items-center justify-center gap-2 text-gray-600 font-nunito">
         <span className="text-sm">Didn't receive the code?</span>
         <span
           role="button"
           onClick={handleResendCode}
-          className="underline cursor-pointer hover:text-gray-400 transition-colors duration-200"
+          className="hover:text-neutral2 cursor-pointer underline transition-colors duration-200"
         >
           resend
         </span>
