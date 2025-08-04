@@ -13,9 +13,9 @@ export const roleEnum = pgEnum("role", ["admin", "member", "viewer"]);
 
 // users table
 export const users = pgTable("users", {
-  id: uuid("id").primaryKey().defaultRandom(), // clerk user id
+  id: uuid("id").primaryKey().defaultRandom(),
   email: text("email").notNull().unique(),
-  profileData: jsonb("profile_data"), // store clerk profile data
+  profileData: jsonb("profile_data"), // store clerk profile data including clerk id
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

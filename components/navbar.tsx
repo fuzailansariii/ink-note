@@ -1,21 +1,28 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Container from "./container";
 import Link from "next/link";
-import { useUser } from "@clerk/nextjs";
+import { useClerk, useUser } from "@clerk/nextjs";
 import MenuButton from "@/icons/hamburger";
 import XMark from "@/icons/xMark";
 import { AnimatePresence, motion } from "framer-motion";
+import Button from "./button";
+import { set } from "zod";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [signingOut, setSigningOut] = useState<boolean>(true);
 
   const { isSignedIn } = useUser();
+  const { signOut } = useClerk();
   const menuItems = [
     { name: "About", href: "/about" },
     { name: "Contact", href: "/contact" },
     ...(isSignedIn
-      ? [{ name: "Dashboard", href: "/dashboard" }]
+      ? [
+          { name: "Dashboard", href: "/dashboard" },
+          { name: "Workspaces", href: "/workspaces" },
+        ]
       : [
           { name: "Login", href: "/sign-in" },
           { name: "Register", href: "/sign-up" },
@@ -24,6 +31,12 @@ export default function Navbar() {
 
   const mobileMenuToggle = () => {
     setMobileMenuOpen((prev) => !prev);
+  };
+
+  const handleSignOut = () => {
+    setSigningOut(true);
+    signOut();
+    setSigningOut(false);
   };
 
   return (
@@ -41,7 +54,7 @@ export default function Navbar() {
           {/* Menu items - right */}
           <div className="items-center">
             {/* web menu style */}
-            <div className="hidden md:flex">
+            <div className="hidden items-center md:flex">
               {menuItems.map((item, index) => (
                 <Link
                   href={item.href}
@@ -52,6 +65,15 @@ export default function Navbar() {
                   {item.name}
                 </Link>
               ))}
+              {isSignedIn && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handleSignOut}
+                >
+                  {signingOut ? "Signing Out..." : "Sign Out"}
+                </Button>
+              )}
             </div>
             {/* mobile menu style */}
             <div className="mr-2 flex md:hidden">
@@ -74,18 +96,28 @@ export default function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.25 }}
-            className="fixed top-20 left-1/2 z-40 w-full -translate-x-1/2 transform space-y-3 rounded-lg bg-white px-6 py-4 shadow-lg sm:w-3/4 md:hidden"
+            className="fixed top-20 left-1/2 z-40 w-full -translate-x-1/2 transform space-y-3 rounded-lg bg-neutral-800 px-6 py-4 shadow-lg sm:w-3/4 md:hidden"
           >
             {menuItems.map((item, index) => (
               <Link
                 key={index}
                 href={item.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="block font-medium text-gray-700 transition-colors duration-200 hover:text-blue-600"
+                className="text-neutral block font-medium transition-colors duration-200 hover:text-blue-600"
               >
                 {item.name}
               </Link>
             ))}
+            {isSignedIn && (
+              <Button
+                type="button"
+                variant="primary"
+                onClick={handleSignOut}
+                className="w-full text-center"
+              >
+                {signingOut ? "Signing Out..." : "Sign Out"}
+              </Button>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
