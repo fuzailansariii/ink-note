@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     const existingUser = await db
       .select()
       .from(users)
-      .where(eq(users.email, user.emailAddresses[0].emailAddress))
+      .where(eq(users.id, user.id))
       .limit(1);
 
     //   check if the user already exist
@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
     const newUser = await db
       .insert(users)
       .values({
+        id: user.id,
         email: user.emailAddresses[0].emailAddress,
         profileData: {
           username: user.username,

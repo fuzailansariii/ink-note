@@ -11,7 +11,7 @@ import { set } from "zod";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-  const [signingOut, setSigningOut] = useState<boolean>(true);
+  const [signingOut, setSigningOut] = useState<boolean>(false);
 
   const { isSignedIn } = useUser();
   const { signOut } = useClerk();
