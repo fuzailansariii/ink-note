@@ -15,7 +15,7 @@ import VerificationCodeForm from "@/components/verificationCodeForm";
 import { useRouter } from "next/navigation";
 import User from "@/icons/user";
 import Password from "@/icons/password";
-import { is } from "drizzle-orm";
+import axios from "axios";
 
 export default function SignUp() {
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
@@ -75,7 +75,25 @@ export default function SignUp() {
       });
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });
-        // TODO: EMail verified successfully
+        // TODO: Email verified successfully
+        try {
+          const response = await axios.post("/api/create-user");
+          const dbResult = await response.data;
+          if (response.status !== 201) {
+            console.error(
+              "Failed to create user in the database",
+              dbResult.error,
+            );
+          } else {
+            console.log("User created successfully:", dbResult.message);
+          }
+        } catch (error) {
+          if (error instanceof Error) {
+            console.error("Error message:", error.message);
+          } else {
+            console.error("Unexpected error:", error);
+          }
+        }
         router.push("/dashboard");
       } else {
         console.error("Verification failed:", result.status);

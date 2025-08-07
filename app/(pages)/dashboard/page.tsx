@@ -7,8 +7,8 @@ export default function dashboard() {
 
   return (
     <div>
-      <h1 className="text-3xl font-semibold font-quicksand">Dashboard</h1>
-      <p className="mt-4 text-lg font-nunito">
+      <h1 className="font-quicksand text-3xl font-semibold">Dashboard</h1>
+      <p className="font-nunito mt-4 text-lg">
         Welcome to your dashboard! Here you can manage your notes and settings.
       </p>
       <button onClick={() => signOut()}>Sign Out</button>

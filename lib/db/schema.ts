@@ -6,6 +6,7 @@ import {
   PgTableWithColumns,
   text,
   timestamp,
+  unique,
   uuid,
 } from "drizzle-orm/pg-core";
 
@@ -13,9 +14,9 @@ export const roleEnum = pgEnum("role", ["admin", "member", "viewer"]);
 
 // users table
 export const users = pgTable("users", {
-  id: uuid("id").primaryKey().defaultRandom(), // clerk user id
+  id: text("id").primaryKey(), //clerk userId
   email: text("email").notNull().unique(),
-  profileData: jsonb("profile_data"), // store clerk profile data
+  profileData: jsonb("profile_data"), // store clerk profile data including clerk id
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -24,27 +25,30 @@ export const users = pgTable("users", {
 export const workspaces = pgTable("workspaces", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
-  ownerId: uuid("owner_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+  description: text("description"),
+  ownerId: text("owner_id").notNull(), //clerk userId
   inviteCode: text("invite_code").notNull().unique(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 // workspace members table
-export const workspaceMembers = pgTable("workspace_members", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  workspaceId: uuid("workspace_id")
-    .notNull()
-    .references(() => workspaces.id, { onDelete: "cascade" }),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  role: roleEnum("role").default("member").notNull(),
-  joinedAt: timestamp("joined_at").defaultNow().notNull(),
-  invitedBy: uuid("invited_by").references(() => users.id),
-});
+export const workspaceMembers = pgTable(
+  "workspace_members",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    workspaceId: uuid("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    userId: text("user_id").notNull(), //clerk userId
+    role: roleEnum("role").default("member").notNull(),
+    joinedAt: timestamp("joined_at").defaultNow().notNull(),
+    invitedBy: text("invited_by"),
+  },
+  (table) => ({
+    uniqueWorkspaceUser: unique().on(table.workspaceId, table.userId),
+  }),
+);
 
 // folders table
 export const folders: PgTableWithColumns<any> = pgTable("folders", {
@@ -67,7 +71,7 @@ export const notes = pgTable("notes", {
     .references(() => workspaces.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   content: text("content").notNull(),
-  createdBy: uuid("created_by")
+  createdBy: text("created_by")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   folderId: uuid("folder_id").references(() => folders.id),
@@ -81,7 +85,7 @@ export const messages: PgTableWithColumns<any> = pgTable("messages", {
   workspaceId: uuid("workspace_id")
     .notNull()
     .references(() => workspaces.id, { onDelete: "cascade" }),
-  senderId: uuid("sender_id")
+  senderId: text("sender_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   content: text("content").notNull(),
@@ -96,7 +100,7 @@ export const messages: PgTableWithColumns<any> = pgTable("messages", {
 export const usersRelations = relations(users, ({ many }) => ({
   ownedWorkspaces: many(workspaces),
   workspaceMembers: many(workspaceMembers, {
-    relationName: "memberRelation",
+    relationName: "memberUser",
   }),
   invitedMembers: many(workspaceMembers, {
     relationName: "inviterUser",
