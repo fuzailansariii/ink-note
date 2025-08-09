@@ -43,7 +43,7 @@ export const workspaceRoles = ["admin", "member", "viewer"] as const;
 export type WorkspaceRole = (typeof workspaceRoles)[number];
 
 // response type
-export type WorkspceWithRole = {
+export type WorkspaceWithRole = {
   workspce: {
     id: string;
     name: string;
@@ -58,7 +58,7 @@ export type WorkspceWithRole = {
 };
 
 // workspcememebr type
-export type WorkspaceMemebr = {
+export type WorkspaceMember = {
   id: string;
   userId: string;
   role: WorkspaceRole;
