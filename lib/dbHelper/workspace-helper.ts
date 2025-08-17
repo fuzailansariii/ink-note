@@ -314,6 +314,7 @@ export async function syncUserWithClerk(clerkUser: {
     createdAt: new Date(),
   };
 
+  // upsert user (insert or update)
   const [user] = await db
     .insert(users)
     .values(userData)
