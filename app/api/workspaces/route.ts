@@ -7,6 +7,7 @@ import {
 } from "@/lib/dbHelper/workspace-helper";
 import { createWorkspaceSchema } from "@/lib/validation/workspace";
 
+// To Get workspace
 export async function GET() {
   try {
     const { userId } = await auth();
@@ -31,6 +32,7 @@ export async function GET() {
   }
 }
 
+// To create workspace
 export async function POST(req: NextRequest) {
   try {
     const { userId } = await auth();
