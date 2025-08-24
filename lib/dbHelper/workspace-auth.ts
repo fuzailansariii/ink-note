@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { getWorkspace, getWorkspaceMember } from "./workspace-helper";
 import { hasPermission, requirePermission } from "../permissions";
 import { WorkspaceRole } from "../validation/workspace";
+import { NextRequest, NextResponse } from "next/server";
 
 // get current user's workspace access info.
 // return null if user is not authenticated or not a member
@@ -106,7 +107,7 @@ export async function validateWorkspaceAccess(
 export function withWorkspaceAuth<T extends any[]>(
   permission: keyof typeof import("@/lib/permissions").permissions,
   handler: (
-    request: Request,
+    request: NextRequest,
     context: {
       access: {
         userId: string;
@@ -115,10 +116,10 @@ export function withWorkspaceAuth<T extends any[]>(
       };
       params: { workspaceId: string };
     },
-  ) => Promise<Response>,
+  ) => Promise<NextResponse>,
 ) {
   return async (
-    request: Request,
+    request: NextRequest,
     { params }: { params: { workspaceId: string } },
   ) => {
     try {
@@ -135,7 +136,7 @@ export function withWorkspaceAuth<T extends any[]>(
       const message = error instanceof Error ? error.message : "Access denied";
 
       if (message.includes("Authentication required")) {
-        return new Response(
+        return new NextResponse(
           JSON.stringify({ error: "Authentication required" }),
           {
             status: 401,
@@ -145,16 +146,19 @@ export function withWorkspaceAuth<T extends any[]>(
       }
 
       if (message.includes("Access denied")) {
-        return new Response(JSON.stringify({ error: message }), {
+        return new NextResponse(JSON.stringify({ error: message }), {
           status: 403,
           headers: { "Content-Type": "application/json" },
         });
       }
 
-      return new Response(JSON.stringify({ error: "Internal server error" }), {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      });
+      return new NextResponse(
+        JSON.stringify({ error: "Internal server error" }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
   };
 }
