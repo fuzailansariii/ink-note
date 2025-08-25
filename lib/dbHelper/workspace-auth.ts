@@ -104,7 +104,68 @@ export async function validateWorkspaceAccess(
  * Higher-order function for API route protection
  * Usage: export const GET = withWorkspaceAuth('workspace:view', async (request, { access, params }) => { ... });
  */
-export function withWorkspaceAuth<T extends any[]>(
+// export function withWorkspaceAuth<T extends any[]>(
+//   permission: keyof typeof import("@/lib/permissions").permissions,
+//   handler: (
+//     request: NextRequest,
+//     context: {
+//       access: {
+//         userId: string;
+//         member: any;
+//         role: WorkspaceRole;
+//       };
+//       params: { workspaceId: string };
+//     },
+//   ) => Promise<NextResponse>,
+// ) {
+//   return async (
+//     request: NextRequest,
+//     { params }: { params: { workspaceId: string } },
+//   ) => {
+//     try {
+//       const access = await validateWorkspaceAccess(
+//         params.workspaceId,
+//         permission,
+//       );
+
+//       return await handler(request, {
+//         access,
+//         params,
+//       });
+//     } catch (error) {
+//       const message = error instanceof Error ? error.message : "Access denied";
+
+//       if (message.includes("Authentication required")) {
+//         return new NextResponse(
+//           JSON.stringify({ error: "Authentication required" }),
+//           {
+//             status: 401,
+//             headers: { "Content-Type": "application/json" },
+//           },
+//         );
+//       }
+
+//       if (message.includes("Access denied")) {
+//         return new NextResponse(JSON.stringify({ error: message }), {
+//           status: 403,
+//           headers: { "Content-Type": "application/json" },
+//         });
+//       }
+
+//       return new NextResponse(
+//         JSON.stringify({ error: "Internal server error" }),
+//         {
+//           status: 500,
+//           headers: { "Content-Type": "application/json" },
+//         },
+//       );
+//     }
+//   };
+// }
+export function withWorkspaceAuth<
+  P extends { workspaceId: string }, // at least workspaceId must exist
+  T extends any[],
+>(
   permission: keyof typeof import("@/lib/permissions").permissions,
   handler: (
     request: NextRequest,
@@ -114,15 +175,13 @@ export function withWorkspaceAuth<T extends any[]>(
         member: any;
         role: WorkspaceRole;
       };
-      params: { workspaceId: string };
+      params: P;
     },
   ) => Promise<NextResponse>,
 ) {
-  return async (
-    request: NextRequest,
-    { params }: { params: { workspaceId: string } },
-  ) => {
+  return async (request: NextRequest, { params }: { params: P }) => {
     try {
+      // Always validate workspace access
       const access = await validateWorkspaceAccess(
         params.workspaceId,
         permission,
